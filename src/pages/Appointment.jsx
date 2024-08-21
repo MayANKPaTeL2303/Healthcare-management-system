@@ -7,7 +7,7 @@ function Appointment() {
     specialist: "",
     phoneno: "",
   });
-  
+  const [displaysubmit, setDisplaysubmit] = useState(false);
   const handlechange = (e) => {
     setFormData({
       ...formData,
@@ -15,15 +15,39 @@ function Appointment() {
     });
   };
 
-  const handlesubmit = (e) => {
+  const handlesubmit = async (e) => {
     console.log("Form submitted with data:", formData);
     e.preventDefault();
-    setFormData({
-      name: "",
-      email: "",
-      specialist: "",
-      phoneno: "",
-    });
+    try {
+      const response = await fetch("http://localhost:5000/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        const newAppointment = await response.json();
+        createAppointment(newAppointment);
+        setFormData({
+          name: "",
+          email: "",
+          specialist: "",
+          phoneno: "",
+          dob: ""
+        });
+        alert("Appointment booked Sucessfully");
+      } else {
+        alert("Failed booking");
+      }
+    } catch (error) {
+      console.log("Error");
+      alert("An error occurred while booking the appointment");
+    }
+  };
+
+  const showsubmit = () => {
+    setDisplaysubmit(true);
   };
 
   return (
@@ -91,6 +115,7 @@ function Appointment() {
               type="date"
               name="dob"
               placeholder=" "
+              // onChange={handlechange}
               value={formData.dob}
               className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               required
@@ -111,7 +136,7 @@ function Appointment() {
               Specialist:{" "}
             </label>
             <input
-              type="text" 
+              type="text"
               list="specialist"
               name="specialist"
               onChange={handlechange}
@@ -146,12 +171,22 @@ function Appointment() {
 
         {/* Submit Button */}
         <button
+          onClick={showsubmit}
           type="submit"
           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         >
           Submit
         </button>
+        <br />
       </form>
+      <div>
+        {displaysubmit && (
+          <div className="flex text-center justify-center p-6">
+            Your Appointment is sucessfully submitted
+          </div>
+        )}
+      </div>
+      {/* <div><div className="flex text-center justify-center p-6" >Your Appointment is sucessfully submitted</div></div> */}
     </div>
   );
 }
