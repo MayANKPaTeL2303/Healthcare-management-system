@@ -1,192 +1,141 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Appointment() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    specialist: "",
-    phoneno: "",
-  });
-  const [displaysubmit, setDisplaysubmit] = useState(false);
-  const handlechange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+
+const [user,setUser] = useState({
+  username: "",
+  specialist: "",
+  phone: "",
+  date: "",
+})
+
+
+// Handling the input value on change
+const handleInput = (e)=>{
+  console.log(e)
+  let name = e.target.name;
+  let value = e.target.value
+  setUser({
+    ...user,
+    [name]: value,
+  })
+
+};
+
+const navigate = useNavigate();   
+
+//Handling the form submition
+const handleSubmit = async (e)=>{
+  e.preventDefault();
+  console.log(user)
+
+  // Connecting backend with the frontend
+  try {
+    const response = await fetch(`http://localhost:5000/api/auth/appointment`,{
+      method:"POST",
+      headers:{
+        "Content-Type": "application/json",
+      },
+      body:JSON.stringify(user)
     });
-  };
+    if(response.ok)
+    {
+      setUser({
+        username: "",
+        specialist: "",
+        phone: "",
+        date: ""
+      })
 
-  const handlesubmit = async (e) => {
-    console.log("Form submitted with data:", formData);
-    e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:5000/appointments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        const newAppointment = await response.json();
-        createAppointment(newAppointment);
-        setFormData({
-          name: "",
-          email: "",
-          specialist: "",
-          phoneno: "",
-          dob: ""
-        });
-        alert("Appointment booked Sucessfully");
-      } else {
-        alert("Failed booking");
-      }
-    } catch (error) {
-      console.log("Error");
-      alert("An error occurred while booking the appointment");
     }
-  };
+    console.log(response)
+  } catch (error) {
+    console.log("appointment",error)
+  }
+};
 
-  const showsubmit = () => {
-    setDisplaysubmit(true);
-  };
+ 
 
   return (
-    <div className="p-14 border-s-black">
-      <form onSubmit={handlesubmit} className="max-w-md mx-auto">
-        {/* Full Name Input */}
-        <div className="relative z-0 w-full mb-5 group">
-          <input
-            type="text"
-            name="name"
-            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-            onChange={handlechange}
-            value={formData.name}
-            required
-            placeholder=" "
-          />
-          <label
-            htmlFor="name"
-            className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-black duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
-            Name of the patient
-          </label>
-        </div>
-
-        {/* Email Input */}
-        <div className="relative z-0 w-full mb-5 group">
-          <input
-            type="email"
-            name="email"
-            onChange={handlechange}
-            value={formData.email}
-            placeholder=" "
-            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-            required
-          />
-          <label
-            htmlFor="email"
-            className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-black duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
-            Email address
-          </label>
-        </div>
-        <div className="relative z-0 w-full mb-5 group">
-          <input
-            type="tel"
-            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-            name="phoneno"
-            placeholder=" "
-            onChange={handlechange}
-            value={formData.phoneno}
-            className="block py-2.5 px-0 w-full text-sm text-gray-900 border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-            required
-          />
-          <label
-            htmlFor="phoneno"
-            className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-black duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
-            Phone number (123-456-7890)
-          </label>
-        </div>
-        <div className="grid md:grid-cols-2 md:gap-6">
-          {/* Date of Birth Input */}
-          <div className="relative z-0 w-full mb-5 group">
-            <input
-              type="date"
-              name="dob"
-              placeholder=" "
-              // onChange={handlechange}
-              value={formData.dob}
-              className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-              required
-            />
-            <label
-              htmlFor="dob"
-              className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-black duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-            >
-              Date of Appointment
-            </label>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <section className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <main>
+          <div className="section-registration">
+            {/* Main registration code */}
+            <div className="registration-form">
+              <h1 className="text-3xl font-bold text-center mb-6 text-gray-700">
+                Appointment Form
+              </h1>
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                  <label
+                    htmlFor="username"
+                    className="block text-gray-600 mb-2"
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={user.username}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Username"
+                    onChange={handleInput}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="specialist" className="block text-gray-600 mb-2">
+                    Specialist 
+                  </label>
+                  <input
+                    type="text"
+                    name="specialist"
+                    value={user.specialist}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Specialist"
+                    onChange={handleInput}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="phone" className="block text-gray-600 mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="number"
+                    name="phone"
+                    value={user.phone}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={handleInput}
+                  />
+                </div>
+                <div className="mb-6">
+                  <label
+                    htmlFor="date"
+                    className="block text-gray-600 mb-2"
+                  >
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={user.date}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Date"
+                    onChange={handleInput}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+                >
+                  Next
+                </button>
+              </form>
+            </div>
           </div>
-
-          <div className="relative z-0 w-full mb-5 group">
-            <label
-              htmlFor="specialist"
-              className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-black duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-            >
-              Specialist:{" "}
-            </label>
-            <input
-              type="text"
-              list="specialist"
-              name="specialist"
-              onChange={handlechange}
-              value={formData.specialist}
-              placeholder=" "
-              className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-black dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-              required
-            />
-            <datalist id="specialist">
-              <option value="Allergists/Immunologists" />
-              <option value="Anesthesiologists" />
-              <option value="Cardiologists" />
-              <option value="Colon and Rectal Surgeons" />
-              <option value="Dermatologists" />
-              <option value="Endocrinologists" />
-              <option value="Gastroenterologists" />
-              <option value="Geriatric Medicine Specialists" />
-              <option value="Hematologists" />
-              <option value="Infectious Disease Specialists" />
-              <option value="Neurologists" />
-              <option value="Ophthalmologists" />
-              <option value="Pathologists" />
-              <option value="Physiatrists" />
-              <option value="Plastic Surgeons" />
-              <option value="Psychiatrists" />
-              <option value="Radiologists" />
-              <option value="General Surgeons" />
-              <option value="Urologists" />
-            </datalist>
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <button
-          onClick={showsubmit}
-          type="submit"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        >
-          Submit
-        </button>
-        <br />
-      </form>
-      <div>
-        {displaysubmit && (
-          <div className="flex text-center justify-center p-6">
-            Your Appointment is sucessfully submitted
-          </div>
-        )}
-      </div>
-      {/* <div><div className="flex text-center justify-center p-6" >Your Appointment is sucessfully submitted</div></div> */}
+        </main>
+      </section>
     </div>
   );
 }
